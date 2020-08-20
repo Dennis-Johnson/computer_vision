@@ -40,19 +40,29 @@ def main():
     mean = holi_green.mean()
     stdev = holi_green.std()
 
-    print("Min: {}".format(min))
-    print("Max: {}" .format(max))
-    print("Mean: {}".format(mean))
-    print("Std Dev: {}".format(stdev))
+    # print("Min: {}".format(min))
+    # print("Max: {}" .format(max))
+    # print("Mean: {}".format(mean))
+    # print("Std Dev: {}".format(stdev))
 
     manipulate = (((holi_green - mean) / stdev) * 10) + mean
     cv2.imwrite("./output/ps0-4-b-1.png", manipulate)
 
     # Left shift
-    width = holi_green.shape[0]
+    width = holi_green.shape[1]
     left_shift = np.zeros(holi_green.shape)
     left_shift[:, 0:width - 2] = holi_green[:, 2:width]
     cv2.imwrite("./output/ps0-4-c-1.png", left_shift)
+
+    # Add Gaussian Noise to green and blue channels
+    noisy_blue = np.array(img1.copy(), dtype=np.float64)
+    noise = np.random.normal(0, 1, img1.shape[:2]) * 100
+    noisy_blue[:, :, 0] += noise
+    cv2.imwrite('./output/ps0-5-a-1.png', noisy_blue)
+
+    noisy_green = np.array(img1.copy(), dtype=np.float64)
+    noisy_green[:, :, 1] += noise
+    cv2.imwrite('./output/ps0-5-b-1.png', noisy_blue)
 
 
 if __name__ == "__main__":
