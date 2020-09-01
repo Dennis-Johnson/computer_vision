@@ -47,9 +47,25 @@ def highlight_hough_peaks(coordinates):
 
 
 def hough_lines(coordinates):
+    img = cv.imread('./input/ps1-input0.png')
     for i in range(len(coordinates)):
         rho = coordinates[i][0]
-        theta = coordinates[i][1]
+        theta = np.deg2rad(coordinates[i][1])
+
+        cos = np.cos(theta)
+        sin = np.sin(theta)
+
+        x0 = rho * cos
+        y0 = rho * sin
+        x1 = int(x0 + 1000*(-sin))
+        y1 = int(y0 + 1000*(cos))
+        x2 = int(x0 - 1000*(-sin))
+        y2 = int(y0 - 1000 * (cos))
+
+        cv.line(img, (x1, y1), (x2, y2), (0, 255, 255), thickness=2)
+
+    # Write final image with lines highlighted in yellow
+    cv.imwrite('./output/ps1-2-c-1.png', img)
 
 
 def main():
