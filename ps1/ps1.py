@@ -2,48 +2,75 @@ import cv2 as cv
 import numpy as np
 
 
+def hough_acc(img_edges):
+    # Taking resolution of rho as 1 pixel and theta as 1 degree
+    height, width = img_edges.shape
+    diagonal = np.sqrt(
+        height ** 2 + width ** 2)
+
+    # rho values range from  0 to 2 * diagonal length
+    rho_axis = int(2 * np.ceil(diagonal))
+    thetas = np.deg2rad(np.arange(0, 180, 1))
+    theta_axis = len(thetas)
+
+    # Compute cos and sin values for the range of thetas
+    cos_t = np.cos(thetas)
+    sin_t = np.sin(thetas)
+
+    accumulator = np.zeros((rho_axis, theta_axis), dtype=np.uint8)
+
+    # Indices of edge pixels in the image (white pixels)
+    y_indx, x_indx = np.where(img_edges >= 255)
+
+    for i in range(len(x_indx)):
+        x = x_indx[i]
+        y = y_indx[i]
+
+        for theta_indx in range(len(thetas)):
+            rho = int(x * cos_t[theta_indx] +
+                      y * sin_t[theta_indx])
+
+            accumulator[rho][theta_indx] += 1
+    return accumulator
+
+
+def highlight_hough_peaks(coordinates):
+    peak_img = cv.imread('./output/ps1-2-a-1.png')
+
+    for i in range(len(coordinates)):
+        y = coordinates[i][0]
+        x = coordinates[i][1]
+
+        cv.rectangle(peak_img, (x-2, y-2), (x+2, y+2), (0, 255, 255))
+
+    cv.imwrite("./output/ps1-2-b-1.png", peak_img)
+
+
+def hough_lines(coordinates):
+    for i in range(len(coordinates)):
+        rho = coordinates[i][0]
+        theta = coordinates[i][1]
+
+
 def main():
     # Find object boundaries
     img = cv.imread('./input/ps1-input0.png')
-    squares = cv.Canny(img, 100, 200)
-    cv.imwrite('./output/ps1-1-a-1.png', squares)
+    edges = cv.Canny(img, 100, 200)
+    lines = cv.imwrite('./output/ps1-1-a-1.png', edges)
 
-    # Hough transform
-    hough_lines = hough_lines_acc(squares)
-    lines = cv.imwrite('./test.png', hough_lines)
+    # Compute the hough accumulator for the edge image
+    accumulator = hough_acc(edges)
+    lines = cv.imwrite('./output/ps1-2-a-1.png', accumulator)
 
+    # Find peaks in the accumulator with votes more than the lower threshold
+    peaks = np.where(accumulator > 110)
+    coordinates = list(zip(peaks[0], peaks[1]))
 
-def hough_lines_acc(img_edges):
-    # Taking resolution of rho as 1 pixel and theta as 1 degree
+    # Draw yellow boxes over peaks in the accumulator image
+    highlight_hough_peaks(coordinates)
 
-    diagonal = np.sqrt(
-        (img_edges.shape[0] - 1) ** 2 + (img_edges.shape[1] - 1) ** 2)
-
-    # rho values range from -diagonal to +diagonal
-    rho_axis = int(2 * np.ceil(diagonal) + 1)
-    theta_axis = 180
-    shape = (rho_axis, theta_axis)
-    accumulator = np.zeros((shape))
-
-    for y in range(0, img_edges.shape[0]):
-        for x in range(0, img_edges.shape[1]):
-            # Check if current point is an edge
-            if img_edges[y][x] >= 255:
-                # Vote for all lines through x,y
-                for theta in range(-90, 90):
-                    rho = int(x * np.cos(to_radians(theta)) +
-                              y * np.sin(to_radians(theta)))
-                    accumulator[rho][theta+90] += 1
-
-    return accumulator
-
-
-def to_radians(deg):
-    return deg * np.pi / 180
-
-
-def hough_peaks(accumulator):
-    return accumulator
+    # Draw lines over the original image
+    hough_lines(coordinates)
 
 
 if __name__ == '__main__':
