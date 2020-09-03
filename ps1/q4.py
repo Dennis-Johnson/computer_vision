@@ -40,7 +40,7 @@ def highlight_hough_peaks(coordinates, accumulator):
         y = coordinates[i][0]
         x = coordinates[i][1]
 
-        cv.rectangle(accumulator, (x-2, y-2), (x+2, y+2), (255, 255, 255))
+        cv.rectangle(accumulator, (x-2, y-2), (x+2, y+2), (0, 255, 255))
 
     cv.imwrite("./output/ps1-4-c-1.png", accumulator)
 
