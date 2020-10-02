@@ -4,42 +4,44 @@ import numpy as np
 import cv2
 from tqdm import trange
 
-
-# TODO: Save output images (D_L as output/ps2-1-a-1.png and D_R as output/ps2-1-a-2.png)
 # Note: They may need to be scaled/shifted before saving to show results properly
 
+
 def disparity_ssd(imgL, imgR):
-    # Use a window of size WINDOW_WIDTH x WINDOW_WIDTH
-    WINDOW_WIDTH = 9
+
+    WINDOW_WIDTH = 19  # Use a window of size WINDOW_WIDTH x WINDOW_WIDTH
+    MAX_OFFSET = 10   # Maximum number of neighbouring pixels to check
 
     # Number of cols and rows on the flanks of the centre pixel
-    left_out = (WINDOW_WIDTH - 1) // 2
+    half_kernel = (WINDOW_WIDTH - 1) // 2
 
     rows, cols = imgL.shape
     disparity_matrix = np.zeros((rows, cols))
 
+    scale_factor = 1.2
+
     # Using trange to log the completion percentage
-    for i in trange(left_out, rows - left_out):
-        for j in range(left_out, cols - left_out):
-            base_window = imgL[i - left_out:i +
-                               left_out, j - left_out:j + left_out]
+    for i in trange(half_kernel, rows - half_kernel):
+        for j in range(half_kernel, cols - half_kernel):
+            prev_ssd = 65534
+            best_match_index = j
 
-            line_disparity = np.zeros(cols)
+            base_window = imgL[i - half_kernel:i +
+                               half_kernel, j - half_kernel:j + half_kernel]
 
-            # Compute SSD between base_window of the left image and windows
+            # Compute SSD between base_window of the left image and all windows
             # along the same line on the right image.
-            for k in range(left_out, cols - left_out):
-                right_window = imgR[i - left_out:i +
-                                    left_out, k - left_out:k + left_out]
-                diff = right_window - base_window
-                line_disparity[k] = np.sum(np.square(diff))
+            for k in range(half_kernel, cols - half_kernel):
+                right_window = imgR[i - half_kernel:i +
+                                    half_kernel, k - half_kernel:k + half_kernel]
+                diff = base_window - right_window
+                ssd = np.sum(np.square(diff))
 
-            disparity_matrix[i][j] = np.argmin(
-                line_disparity[left_out:cols - left_out])
+                if (ssd < prev_ssd):
+                    prev_ssd = ssd
+                    best_match_index = k
 
-            if (disparity_matrix[i][j] != 0):
-                print(disparity_matrix[i][j])
-
+            disparity_matrix[i][j] = j - best_match_index
     return disparity_matrix
 
 
@@ -48,13 +50,17 @@ def main():
     L = cv2.imread(os.path.join('input', 'pair0-L.png'), 0)
     R = cv2.imread(os.path.join('input', 'pair0-R.png'), 0)
 
-    # Compute disparity (using method disparity_ssd defined in disparity_ssd.py)
     D_L = disparity_ssd(L, R)
-    print(D_L)
-    # D_R = disparity_ssd(R, L)
+    D_R = disparity_ssd(R, L)
 
-    # cv2.imwrite("dispLR.png", D_L)
-    # cv2.imwrite("dispRL.png", D_R)
+    # Scale original disparity matrices to highlight the differences
+    SCALE_FACTOR = 255 / np.max(np.abs(D_L))
+
+    scaledLR = np.abs(D_L) * SCALE_FACTOR
+    scaledRL = np.abs(D_R) * SCALE_FACTOR
+
+    cv2.imwrite("./output/ps2-1-a-1.png", scaledLR)
+    cv2.imwrite("./output/ps2-1-a-2.png", scaledRL)
 
 
 if __name__ == "__main__":
