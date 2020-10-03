@@ -58,7 +58,7 @@ def disparity_ssd(imgL, imgR):
 
 def main():
     # Problem 1 -----------------------------------------------------
-
+    '''
     # Load images as greyscale --> set flag = 0
     L1 = cv2.imread(os.path.join('input', 'pair0-L.png'), 0)
     R1 = cv2.imread(os.path.join('input', 'pair0-R.png'), 0)
@@ -74,9 +74,9 @@ def main():
 
     cv2.imwrite("./output/ps2-1-a-1.png", D_LR1)
     cv2.imwrite("./output/ps2-1-a-2.png", D_RL1)
-
+    '''
     # Problem 2 -------------------------------------------------------
-
+    '''
     L2 = cv2.imread(os.path.join('input', 'pair1-L.png'), 0)
     R2 = cv2.imread(os.path.join('input', 'pair1-R.png'), 0)
 
@@ -90,8 +90,9 @@ def main():
 
     cv2.imwrite("./output/ps2-2-a-1_scaled.png", scaledLR2)
     cv2.imwrite("./output/ps2-2-a-2_scaled.png", scaledRL2)
-
+    '''
     # Problem 3 -------------------------------------------------------
+    # SSD with noise pertubations
 
 
 if __name__ == "__main__":
