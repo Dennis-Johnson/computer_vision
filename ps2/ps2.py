@@ -76,10 +76,10 @@ def main():
     cv2.imwrite("./output/ps2-1-a-2.png", D_RL1)
     '''
     # Problem 2 -------------------------------------------------------
-    '''
+
     L2 = cv2.imread(os.path.join('input', 'pair1-L.png'), 0)
     R2 = cv2.imread(os.path.join('input', 'pair1-R.png'), 0)
-
+    '''
     D_LR2 = disparity_ssd(L2, R2)
     D_RL2 = disparity_ssd(R2, L2)
 
@@ -93,6 +93,21 @@ def main():
     '''
     # Problem 3 -------------------------------------------------------
     # SSD with noise pertubations
+
+    noise = np.uint8(np.random.normal(0, 1, L2.shape) * 10)
+    L3_noisy = L2 + noise
+    R3_noisy = R2 + noise
+
+    D_LR3 = disparity_ssd(L3_noisy, R3_noisy)
+    D_RL3 = disparity_ssd(R3_noisy, L3_noisy)
+
+    SCALE_FACTOR = 255 / np.max(np.abs(D_LR3))
+
+    scaledLR3 = np.abs(D_LR3) * SCALE_FACTOR
+    scaledRL3 = np.abs(D_RL3) * SCALE_FACTOR
+
+    cv2.imwrite("./output/ps2-3-a-1_scaled.png", scaledLR3)
+    cv2.imwrite("./output/ps2-3-a-2_scaled.png", scaledRL3)
 
 
 if __name__ == "__main__":
