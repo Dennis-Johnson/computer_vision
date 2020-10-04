@@ -91,7 +91,7 @@ def main():
     cv2.imwrite("./output/ps2-2-a-1_scaled.png", scaledLR2)
     cv2.imwrite("./output/ps2-2-a-2_scaled.png", scaledRL2)
     '''
-    # Problem 3 -------------------------------------------------------
+    # Problem 3A -------------------------------------------------------
     # SSD with noise pertubations
 
     noise = np.uint8(np.random.normal(0, 1, L2.shape) * 10)
@@ -108,6 +108,20 @@ def main():
 
     cv2.imwrite("./output/ps2-3-a-1_scaled.png", scaledLR3)
     cv2.imwrite("./output/ps2-3-a-2_scaled.png", scaledRL3)
+
+    L3_bright = L2 * 1.1
+    R3_bright = R2 * 1.1
+
+    D_LR_3B = disparity_ssd(L3_bright, R3_bright)
+    D_RL_3B = disparity_ssd(R3_bright, L3_bright)
+
+    SCALE_FACTOR = 255 / np.max(np.abs(D_LR_3B))
+
+    scaledLR3B = np.abs(D_LR_3B) * SCALE_FACTOR
+    scaledRL3B = np.abs(D_RL_3B) * SCALE_FACTOR
+
+    cv2.imwrite("./output/ps2-3-b-1_scaled.png", scaledLR3B)
+    cv2.imwrite("./output/ps2-3-b-2_scaled.png", scaledRL3B)
 
 
 if __name__ == "__main__":
